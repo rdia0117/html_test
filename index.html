@@ -32,15 +32,17 @@
     line-height: 1.55;
   }
   .wrap { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
-  h1 { font-size: 1.6rem; margin: 0 0 4px; }
-  .sub { color: var(--muted); font-size: .9rem; margin: 0 0 20px; }
+  h1 { font-size: 1.6rem; margin: 0 0 8px; }
 
   .filters {
     position: sticky; top: 0; z-index: 5; background: var(--bg);
     padding: 12px 0; border-bottom: 1px solid var(--line); margin-bottom: 8px;
+    display: flex; flex-direction: column; gap: 8px;
   }
-  .frow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
-  .frow:last-child { margin-bottom: 0; }
+  .fmain { display: flex; flex-direction: column; gap: 8px; }
+  .opts { order: 1; }
+  .frow, .chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .catSelect { display: none; }
   .flabel { font-size: .85rem; color: var(--muted); width: 4.5em; flex-shrink: 0; }
   .chip {
     border: 1px solid var(--line); background: var(--card); color: var(--text);
@@ -83,11 +85,21 @@
   @media (max-width: 560px) {
     .day { grid-template-columns: 1fr; gap: 6px; }
     .dlabel .d { display: inline; margin-right: 6px; }
-    .flabel { width: 100%; }
     .legend { display: none; }
-    /* 往下滑時隱藏過濾器，往上滑再出現 */
+    /* 手機：地區按鈕＋類別下拉選單排成一行並常駐；上方的選項列往下滑時隱藏 */
+    .opts { order: -1; }
+    .fmain { flex-direction: row; align-items: center; }
+    .flabel, #catFilter { display: none; }
+    .fmain > .frow, #groupFilter { flex-wrap: nowrap; }
+    .fmain > .frow:last-child { flex: 1; min-width: 0; }
+    #groupFilter .chip { white-space: nowrap; }
+    .catSelect {
+      display: block; width: 100%; min-width: 0; font: inherit; font-size: .88rem;
+      padding: 4px 8px; border-radius: 999px; border: 1px solid var(--line);
+      background: var(--card); color: var(--text);
+    }
+    .catSelect.on { border-color: var(--accent); color: var(--accent); }
     .filters { transition: transform .25s ease; }
-    .filters.hidden { transform: translateY(-100%); }
     /* 精簡卡片：點一下才展開主要影響與來源備註 */
     .ev { cursor: pointer; -webkit-tap-highlight-color: transparent; }
     .ev .detail { display: none; }
@@ -101,11 +113,13 @@
 <body>
 <div class="wrap">
   <h1>重大事件行事曆</h1>
-  <p class="sub">國際與台灣市場重大事件・依日期排序，同日依重要度高→低</p>
 
   <div class="filters">
-    <div class="frow"><span class="flabel">地區</span><div id="groupFilter" class="frow" style="margin:0"></div></div>
-    <div class="frow"><span class="flabel">類別</span><div id="catFilter" class="frow" style="margin:0"></div></div>
+    <div class="fmain">
+      <div class="frow"><span class="flabel">地區</span><div id="groupFilter" class="chips"></div></div>
+      <div class="frow"><span class="flabel">類別</span><div id="catFilter" class="chips"></div>
+        <select id="catSelect" class="catSelect" aria-label="類別"></select></div>
+    </div>
     <div class="opts">
       <label><input type="checkbox" id="hidePast" checked> 隱藏已過事件</label>
       <span class="legend"><span class="s">★★★</span> 極高　<span class="s">★★</span> 高　<span class="s">★</span> 中高</span>
@@ -202,6 +216,11 @@ function buildChips(el, values, key) {
 }
 buildChips(document.getElementById('groupFilter'), GROUPS, 'group');
 buildChips(document.getElementById('catFilter'), categories, 'cat');
+// 手機版的類別下拉選單（與桌機版按鈕共用同一個狀態）
+const catSelect = document.getElementById('catSelect');
+catSelect.innerHTML = [['全部', '全部類別'], ...categories.map(c => [c, c])]
+  .map(([v, t]) => `<option value="${esc(v)}">${esc(t)}</option>`).join('');
+catSelect.addEventListener('change', () => { state.cat = catSelect.value; render(); });
 document.getElementById('hidePast').addEventListener('change', render);
 
 // ===== 畫面 =====
@@ -230,6 +249,8 @@ function eventHTML(e) {
 function render() {
   document.querySelectorAll('#groupFilter .chip').forEach(b => b.classList.toggle('on', b.dataset.v === state.group));
   document.querySelectorAll('#catFilter .chip').forEach(b => b.classList.toggle('on', b.dataset.v === state.cat));
+  catSelect.value = state.cat;
+  catSelect.classList.toggle('on', state.cat !== '全部');
   const hidePast = document.getElementById('hidePast').checked;
   const today = new Date(); today.setHours(0, 0, 0, 0);
 
@@ -264,9 +285,15 @@ function render() {
 }
 render();
 
-// ===== 手機：往下滑隱藏過濾器，往上滑顯示 =====
+// ===== 手機：往下滑時把上方選項列推出畫面，地區＋類別那一行常駐 =====
 const filtersEl = document.querySelector('.filters');
+const fmainEl = document.querySelector('.fmain');
 const listEl = document.getElementById('list');
+function setFiltersHidden(hide) {
+  // 往上推的距離 = 選項列高度（保留 8px 間距當作上緣留白）
+  const offset = fmainEl.getBoundingClientRect().top - filtersEl.getBoundingClientRect().top - 8;
+  filtersEl.style.transform = hide ? `translateY(-${offset}px)` : '';
+}
 const mobileQuery = window.matchMedia('(max-width: 560px)');
 let lastY = window.scrollY;
 window.addEventListener('scroll', () => {
@@ -274,10 +301,10 @@ window.addEventListener('scroll', () => {
   if (Math.abs(dy) < 8) return;  // 忽略微小晃動
   // 滑過事件列表開頭後才隱藏，避免在頁面頂端時過濾器消失
   const hide = mobileQuery.matches && dy > 0 && y > listEl.offsetTop;
-  filtersEl.classList.toggle('hidden', hide);
+  setFiltersHidden(hide);
   lastY = y;
 }, { passive: true });
-mobileQuery.addEventListener('change', () => filtersEl.classList.remove('hidden'));
+mobileQuery.addEventListener('change', () => setFiltersHidden(false));
 
 // ===== 手機：點卡片展開／收合詳細內容 =====
 listEl.addEventListener('click', ev => {
