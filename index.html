@@ -84,7 +84,18 @@
     .day { grid-template-columns: 1fr; gap: 6px; }
     .dlabel .d { display: inline; margin-right: 6px; }
     .flabel { width: 100%; }
+    .legend { display: none; }
+    /* 往下滑時隱藏過濾器，往上滑再出現 */
+    .filters { transition: transform .25s ease; }
+    .filters.hidden { transform: translateY(-100%); }
+    /* 精簡卡片：點一下才展開主要影響與來源備註 */
+    .ev { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .ev .detail { display: none; }
+    .ev.open .detail { display: block; }
+    .chev { display: inline-block; margin-left: auto; color: var(--muted); transition: transform .2s; }
+    .ev.open .chev { transform: rotate(180deg); }
   }
+  @media (min-width: 561px) { .chev { display: none; } }
 </style>
 </head>
 <body>
@@ -208,9 +219,12 @@ function eventHTML(e) {
       <span class="tag g-${esc(e.group)}">${esc(e.group)}</span>
       ${e.region && e.region !== e.group ? `<span class="tag">${esc(e.region)}</span>` : ''}
       <span class="tag cat">${esc(e.category)}</span>
+      <span class="chev" aria-hidden="true">▾</span>
     </div>
-    ${e.main_impact ? `<p class="impact">${esc(e.main_impact)}</p>` : ''}
-    <div class="meta">${meta.map(m => `<span>${esc(m)}</span>`).join('')}</div>
+    <div class="detail">
+      ${e.main_impact ? `<p class="impact">${esc(e.main_impact)}</p>` : ''}
+      <div class="meta">${meta.map(m => `<span>${esc(m)}</span>`).join('')}</div>
+    </div>
   </div>`;
 }
 function render() {
@@ -249,6 +263,28 @@ function render() {
   document.getElementById('list').innerHTML = html || '<div class="empty">沒有符合條件的事件</div>';
 }
 render();
+
+// ===== 手機：往下滑隱藏過濾器，往上滑顯示 =====
+const filtersEl = document.querySelector('.filters');
+const listEl = document.getElementById('list');
+const mobileQuery = window.matchMedia('(max-width: 560px)');
+let lastY = window.scrollY;
+window.addEventListener('scroll', () => {
+  const y = window.scrollY, dy = y - lastY;
+  if (Math.abs(dy) < 8) return;  // 忽略微小晃動
+  // 滑過事件列表開頭後才隱藏，避免在頁面頂端時過濾器消失
+  const hide = mobileQuery.matches && dy > 0 && y > listEl.offsetTop;
+  filtersEl.classList.toggle('hidden', hide);
+  lastY = y;
+}, { passive: true });
+mobileQuery.addEventListener('change', () => filtersEl.classList.remove('hidden'));
+
+// ===== 手機：點卡片展開／收合詳細內容 =====
+listEl.addEventListener('click', ev => {
+  if (!mobileQuery.matches || window.getSelection().toString()) return;  // 選取文字時不切換
+  const card = ev.target.closest('.ev');
+  if (card) card.classList.toggle('open');
+});
 </script>
 </body>
 </html>
