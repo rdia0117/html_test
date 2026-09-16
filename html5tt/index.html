@@ -2,344 +2,253 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet" href="style.css?v=20260902">
-<title>台股第一階段選股分流器 — 2026-09-01 報表</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>重大事件行事曆</title>
 <style>
   :root {
-    --bg: #f5f6f8;
-    --panel-bg: #ffffff;
-    --border: #dde1e6;
-    --text: #1f2430;
-    --text-muted: #6b7280;
-    --accent: #2563eb;
-    --accent-bg: #eaf1ff;
-    --row-alt: #f8f9fb;
-    --row-hover: #eef4ff;
+    --bg: #f6f7f9; --card: #ffffff; --text: #1d2330; --muted: #6b7280; --line: #e3e6eb;
+    --accent: #2f5bd3; --accent-soft: #e8eefc; --star: #e0a100; --star-off: #d5d9e0;
+    --tw: #0f8a6a; --tw-soft: #e2f4ee; --intl: #2f5bd3; --intl-soft: #e8eefc;
+    --warn-bg: #fff4e0; --warn-text: #8a5a00; --today: #d9480f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #13161c; --card: #1c2029; --text: #e6e8ee; --muted: #9aa1ad; --line: #2c313c;
+      --accent: #7fa2ff; --accent-soft: #232d45; --star: #f2c14e; --star-off: #3a404c;
+      --tw: #4fd1a8; --tw-soft: #173a31; --intl: #7fa2ff; --intl-soft: #232d45;
+      --warn-bg: #3a2c12; --warn-text: #f2c97a; --today: #ff8a5b;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #13161c; --card: #1c2029; --text: #e6e8ee; --muted: #9aa1ad; --line: #2c313c;
+    --accent: #7fa2ff; --accent-soft: #232d45; --star: #f2c14e; --star-off: #3a404c;
+    --tw: #4fd1a8; --tw-soft: #173a31; --intl: #7fa2ff; --intl-soft: #232d45;
+    --warn-bg: #3a2c12; --warn-text: #f2c97a; --today: #ff8a5b;
   }
   * { box-sizing: border-box; }
   body {
-    margin: 0;
-    padding: 24px;
-    background: var(--bg);
-    color: var(--text);
-    font-family: "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, "Segoe UI", "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
+    line-height: 1.55;
   }
-  h1 {
-    font-size: 20px;
-    margin: 0 0 4px 0;
-  }
-  .subtitle {
-    color: var(--text-muted);
-    font-size: 13px;
-    margin: 0 0 20px 0;
-  }
-  .tabs {
-    display: flex;
-    gap: 4px;
-    border-bottom: 2px solid var(--border);
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
-  .tab-btn {
-    appearance: none;
-    border: none;
-    background: transparent;
-    padding: 10px 20px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-muted);
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -2px;
-  }
-  .tab-btn:hover {
-    color: var(--accent);
-  }
-  .tab-btn.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-  }
-  .tab-panel {
-    display: none;
-  }
-  .tab-panel.active {
-    display: block;
-  }
-  .table-wrap {
-    overflow-x: auto;
-    background: var(--panel-bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-  }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 13px;
-    white-space: nowrap;
-  }
-  thead th {
-    position: sticky;
-    top: 0;
-    background: var(--accent-bg);
-    color: var(--text);
-    text-align: left;
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    user-select: none;
-  }
-  thead th:hover {
-    background: #dce8ff;
-  }
-  th .th-label {
-    vertical-align: middle;
-  }
-  th .sort-arrow {
-    display: inline-block;
-    width: 12px;
-    margin-left: 4px;
-    color: var(--accent);
-    font-size: 11px;
-  }
-  tbody td {
-    padding: 8px 14px;
-    border-bottom: 1px solid var(--border);
-  }
-  tbody tr:nth-child(even) {
-    background: var(--row-alt);
-  }
-  tbody tr:hover {
-    background: var(--row-hover);
-  }
-  .row-count, .missing-note {
-    color: var(--text-muted);
-    font-size: 12px;
-    margin: 10px 2px;
-  }
-  .missing-note {
-    padding: 16px;
-  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: .9rem; margin: 0 0 20px; }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #1a1d24;
-      --panel-bg: #22262f;
-      --border: #343a46;
-      --text: #e6e8eb;
-      --text-muted: #9aa1ac;
-      --accent: #6ea8fe;
-      --accent-bg: #26314a;
-      --row-alt: #262a33;
-      --row-hover: #2c3547;
-    }
-    thead th:hover { background: #2f3c58; }
+  .filters {
+    position: sticky; top: 0; z-index: 5; background: var(--bg);
+    padding: 12px 0; border-bottom: 1px solid var(--line); margin-bottom: 8px;
+  }
+  .frow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .frow:last-child { margin-bottom: 0; }
+  .flabel { font-size: .85rem; color: var(--muted); width: 4.5em; flex-shrink: 0; }
+  .chip {
+    border: 1px solid var(--line); background: var(--card); color: var(--text);
+    border-radius: 999px; padding: 4px 12px; font-size: .88rem; cursor: pointer; font-family: inherit;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .opts { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; font-size: .85rem; color: var(--muted); }
+  .opts label { cursor: pointer; }
+  .legend .s { color: var(--star); letter-spacing: 1px; }
+
+  .warn { background: var(--warn-bg); color: var(--warn-text); border-radius: 8px; padding: 10px 14px; margin: 12px 0; font-size: .88rem; }
+  .warn ul { margin: 4px 0 0; padding-left: 20px; }
+
+  .month { font-size: 1.15rem; margin: 28px 0 8px; padding-bottom: 4px; border-bottom: 2px solid var(--text); }
+  .day { display: grid; grid-template-columns: 92px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--line); }
+  .dlabel { font-weight: 600; }
+  .dlabel .d { font-size: 1.25rem; display: block; line-height: 1.2; }
+  .dlabel .w { font-size: .82rem; color: var(--muted); font-weight: 400; }
+  .dlabel .today { color: var(--today); font-size: .78rem; display: block; }
+  .past { opacity: .5; }
+  .events { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+  .ev { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+  .ev-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
+  .stars { color: var(--star); letter-spacing: 1px; white-space: nowrap; font-size: .95rem; }
+  .stars .off { color: var(--star-off); }
+  .title { font-weight: 600; font-size: 1rem; }
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .tag { font-size: .75rem; padding: 1px 8px; border-radius: 4px; background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+  .tag.g-台灣 { background: var(--tw-soft); color: var(--tw); border-color: transparent; }
+  .tag.g-國際 { background: var(--intl-soft); color: var(--intl); border-color: transparent; }
+  .tag.cat { color: var(--text); }
+  .impact { margin: 6px 0 0; font-size: .9rem; }
+  .meta { margin-top: 4px; font-size: .8rem; color: var(--muted); }
+  .meta span + span::before { content: "・"; }
+  .empty { text-align: center; color: var(--muted); padding: 48px 0; }
+  .count { font-size: .85rem; color: var(--muted); }
+
+  @media (max-width: 560px) {
+    .day { grid-template-columns: 1fr; gap: 6px; }
+    .dlabel .d { display: inline; margin-right: 6px; }
+    .flabel { width: 100%; }
   }
 </style>
 </head>
 <body>
-  <h1>台股第一階段選股分流器 — 分數報表</h1>
-  <p class="subtitle">分析日期：2026-09-01（點欄位標題可切換升冪／降冪排序）</p>
+<div class="wrap">
+  <h1>重大事件行事曆</h1>
+  <p class="sub">國際與台灣市場重大事件・依日期排序，同日依重要度高→低</p>
 
-  <div class="tabs">
-<button class="tab-btn active" data-tab="scores" onclick="switchTab('scores', this)">總表</button>
-<button class="tab-btn" data-tab="trend" onclick="switchTab('trend', this)">趨勢分</button>
-<button class="tab-btn" data-tab="setup" onclick="switchTab('setup', this)">蓄勢分</button>
-<button class="tab-btn" data-tab="risk" onclick="switchTab('risk', this)">風險分</button>
+  <div class="filters">
+    <div class="frow"><span class="flabel">地區</span><div id="groupFilter" class="frow" style="margin:0"></div></div>
+    <div class="frow"><span class="flabel">類別</span><div id="catFilter" class="frow" style="margin:0"></div></div>
+    <div class="opts">
+      <label><input type="checkbox" id="hidePast" checked> 隱藏已過事件</label>
+      <span class="legend"><span class="s">★★★</span> 極高　<span class="s">★★</span> 高　<span class="s">★</span> 中高</span>
+      <span class="count" id="count"></span>
+    </div>
   </div>
 
-<div class="tab-panel active" id="panel-scores">
-    <div class="table-wrap">
-      <table id="table-scores">
-        <thead><tr><th onclick="sortTable('scores', 0, this)"><span class="th-label">股票代號</span><span class="sort-arrow"></span></th><th onclick="sortTable('scores', 1, this)"><span class="th-label">股票名稱</span><span class="sort-arrow"></span></th><th onclick="sortTable('scores', 2, this)"><span class="th-label">買進指數</span><span class="sort-arrow"></span></th><th onclick="sortTable('scores', 3, this)"><span class="th-label">分析結果</span><span class="sort-arrow"></span></th><th onclick="sortTable('scores', 4, this)"><span class="th-label">分析原因</span><span class="sort-arrow"></span></th></tr></thead>
-        <tbody>
-<tr><td>3665</td><td>貿聯-KY</td><td>28</td><td>弱勢惡化</td><td>趨勢36、蓄勢40、風險22；股價未站回20日線，且融資增加但股價未跟上、近5日外資賣超；雖短線指標有回溫，籌碼與中期趨勢仍不足。</td></tr>
-<tr><td>2383</td><td>台光電</td><td>24</td><td>弱勢惡化</td><td>趨勢45、蓄勢48、風險33；股價跌回20日線下、短均線與動能未轉強；MACD動能衰退，融資增幅未帶動股價且外資、投信近5日同步賣超。</td></tr>
-<tr><td>2344</td><td>華邦電</td><td>65</td><td>強勢整理</td><td>趨勢82、蓄勢66、風險21；股價站上20/60日線、均線多頭且20日相對強勢；低點墊高並形成收斂，但MACD動能轉弱、外資與投信近5日賣超，屬強勢整理。</td></tr>
-<tr><td>7769</td><td>鴻勁</td><td>5</td><td>弱勢惡化</td><td>趨勢6、蓄勢24、風險20；僅20日線短期斜率略有支撐，價格與均線、動能分數幾乎皆未建立；融資增加但股價未跟上，投信近5日賣超。</td></tr>
-<tr><td>4979</td><td>華星光</td><td>45</td><td>高檔風險</td><td>趨勢68、蓄勢51、風險28；中期均線與20日相對強度仍強，但短線未站穩5日線；乖離偏大、MACD動能衰退且外資近5日賣超，不宜追高。</td></tr>
-<tr><td>6830</td><td>汎銓</td><td>40</td><td>高檔風險</td><td>趨勢69、蓄勢56、風險34；股價仍在20/60日線之上且20日相對強勢，但偏離20日線過大；MACD動能衰退、融資與外資賣壓同步升高，回檔風險偏高。</td></tr>
-<tr><td>4991</td><td>環宇-KY</td><td>58</td><td>強勢推升</td><td>趨勢78、蓄勢44、風險10；股價站上5/20/60日線、短均線多頭，20日相對強勢並接近或突破20日高；MACD與KD同步偏多，風險僅來自部分乖離與融資增加。</td></tr>
-<tr><td>6442</td><td>光聖</td><td>67</td><td>強勢整理</td><td>趨勢69、蓄勢81、風險16；股價站上5/20/60日線且短均線多頭；低點墊高、三角收斂、融資下降並守價，蓄勢條件很強；惟MACD動能衰退與投信短賣，先視為強勢整理。</td></tr>
-<tr><td>2449</td><td>京元電子</td><td>43</td><td>蓄勢待突破</td><td>趨勢37、蓄勢55、風險5；已站上5/20日線，5日線高於10日線，20日線斜率與短線動能同步改善；外資、投信10日偏多且風險低，但60日趨勢尚未確認。</td></tr>
-<tr><td>6239</td><td>力成</td><td>41</td><td>蓄勢待突破</td><td>趨勢40、蓄勢53、風險10；20日線斜率強、低點明顯墊高並形成三角收斂，價格未破20日低；但尚未站上60日線且近5日法人偏賣，等待突破確認。</td></tr>
-<tr><td>3260</td><td>威剛</td><td>47</td><td>強勢整理</td><td>趨勢59、蓄勢51、風險18；股價站上20/60日線且20日線高於60日線，回檔量縮、融資下降並守價；但MACD動能衰退、外資近5日賣超，屬整理而非續攻。</td></tr>
-<tr><td>2451</td><td>創見</td><td>36</td><td>中性觀察</td><td>趨勢46、蓄勢41、風險18；股價仍在20/60日線之上且中期均線結構尚可；但未站穩5日線、缺乏短線轉強訊號，MACD衰退且外資近5日賣超，多空互抵。</td></tr>
-<tr><td>3715</td><td>定穎投控</td><td>41</td><td>結構改善</td><td>趨勢51、蓄勢40、風險12；20日線斜率與近5日斜率同步改善，股價站上5/20日線，RSI、MACD、KD轉強且20日相對大盤強；但60日趨勢與蓄勢結構尚未完整。</td></tr>
-<tr><td>1605</td><td>華新</td><td>45</td><td>高檔風險</td><td>趨勢84、蓄勢65、風險22；長短均線與相對強度均強，且低點墊高、三角收斂；但已出現放量滯漲與MACD動能衰退，屬高檔轉折警訊，暫不宜追價。</td></tr>
-<tr><td>1785</td><td>光洋科</td><td>32</td><td>結構改善</td><td>趨勢17、蓄勢57、風險7；整體趨勢仍弱、尚未站回20/60日線；但5日線開始高於10日線，20日線斜率改善，融資下降守價且MACD、KD轉強，屬初步修復。</td></tr>
-<tr><td>3105</td><td>穩懋</td><td>64</td><td>強勢推升</td><td>趨勢78、蓄勢58、風險12；股價站上5/20/60日線、短均線多頭，20日相對強勢並突破20日高；法人10日偏多、融資下降守價，惟乖離偏大需防追高。</td></tr>
-<tr><td>3376</td><td>新日興</td><td>69</td><td>強勢推升</td><td>趨勢72、蓄勢72、風險7；股價站上5/20/60日線、短均線多頭，20日相對強勢；回檔量縮、低點墊高且法人偏多，風險低，推升結構完整。</td></tr>
-<tr><td>6531</td><td>愛普*</td><td>47</td><td>中性觀察</td><td>趨勢66、蓄勢47、風險23；股價站上5/20/60日線且短均線偏多，20日相對強勢；但蓄勢分不足，MACD動能衰退、融資與外資風險升高，暫無明確優勢。</td></tr>
-<tr><td>6257</td><td>矽格</td><td>29</td><td>弱勢惡化</td><td>趨勢35、蓄勢47、風險25；雖20日線斜率改善、短線指標轉強，但60日趨勢與中期相對強度不足；融資增加未帶動股價，外資、投信近5日均賣超。</td></tr>
-<tr><td>2408</td><td>南亞科</td><td>77</td><td>強勢推升</td><td>趨勢93、蓄勢71、風險14；長短均線、斜率與相對強度幾乎全面偏多，低點墊高且融資下降守價；僅MACD動能轉弱，主升結構仍在但不宜追急漲。</td></tr>
-<tr><td>6278</td><td>台表科</td><td>52</td><td>強勢整理</td><td>趨勢60、蓄勢65、風險23；股價仍在20/60日線之上，回檔量縮且低點墊高；但未站穩5日線，MACD動能衰退、外資近5日賣超，屬強勢區間整理。</td></tr>
-<tr><td>8358</td><td>金居</td><td>56</td><td>強勢推升</td><td>趨勢70、蓄勢52、風險14；股價站上5/20/60日線、短均線多頭，20日相對強勢且接近20日高；動能仍完整，但20日線乖離與融資增加使追價報酬風險下降。</td></tr>
-<tr><td>2481</td><td>強茂</td><td>62</td><td>蓄勢待突破</td><td>趨勢62、蓄勢61、風險0；5/10/20日短均線多頭，20/60日線斜率改善，低點墊高且融資下降守價；風險分為0，但長期均線結構尚未完成，等待突破。</td></tr>
-<tr><td>2368</td><td>金像電</td><td>59</td><td>強勢整理</td><td>趨勢67、蓄勢68、風險19；股價站上5/20/60日線、短均線多頭，回檔量縮、低點墊高且RSI、MACD、KD轉強；惟融資增加與外資短賣，先視為強勢整理。</td></tr>
-<tr><td>3491</td><td>昇達科</td><td>61</td><td>強勢推升</td><td>趨勢73、蓄勢58、風險12；股價站上5/20/60日線、短均線多頭，20日相對強勢且接近20日高；動能同步偏多、整體風險低，僅需留意外資短賣。</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="row-count">共 25 檔</p></div>
-<div class="tab-panel" id="panel-trend">
-    <div class="table-wrap">
-      <table id="table-trend">
-        <thead><tr><th onclick="sortTable('trend', 0, this)"><span class="th-label">股票代號</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 1, this)"><span class="th-label">股票名稱</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 2, this)"><span class="th-label">類別</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 3, this)"><span class="th-label">TrendScore</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 4, this)"><span class="th-label">價格&gt;MA5</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 5, this)"><span class="th-label">價格&gt;MA10</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 6, this)"><span class="th-label">價格&gt;MA20</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 7, this)"><span class="th-label">價格&gt;MA60</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 8, this)"><span class="th-label">MA10&gt;MA20</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 9, this)"><span class="th-label">MA20&gt;MA60</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 10, this)"><span class="th-label">MA20斜率</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 11, this)"><span class="th-label">MA60斜率</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 12, this)"><span class="th-label">20日相對大盤</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 13, this)"><span class="th-label">60日相對大盤</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 14, this)"><span class="th-label">離20日高點</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 15, this)"><span class="th-label">離60日高點</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 16, this)"><span class="th-label">RSI健康度</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 17, this)"><span class="th-label">MACD轉強</span><span class="sort-arrow"></span></th><th onclick="sortTable('trend', 18, this)"><span class="th-label">KD轉強</span><span class="sort-arrow"></span></th></tr></thead>
-        <tbody>
-<tr><td>3665</td><td>貿聯-KY</td><td>連接器</td><td>36.0</td><td>5</td><td>0.0</td><td>0.0</td><td>10</td><td>0.0</td><td>5</td><td>6</td><td>3</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>3</td><td>1</td><td>3</td></tr>
-<tr><td>2383</td><td>台光電</td><td>PCB材料</td><td>45.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>10</td><td>3</td><td>5</td><td>10</td><td>10</td><td>3</td><td>3</td><td>0.0</td><td>0.0</td><td>1</td><td>0.0</td><td>0.0</td></tr>
-<tr><td>2344</td><td>華邦電</td><td>記憶體</td><td>82.0</td><td>3</td><td>5</td><td>10</td><td>10</td><td>5</td><td>5</td><td>10</td><td>10</td><td>10</td><td>3</td><td>2</td><td>0.0</td><td>4</td><td>2</td><td>3</td></tr>
-<tr><td>7769</td><td>鴻勁</td><td>半導體設備</td><td>6.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>6</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td></tr>
-<tr><td>4979</td><td>華星光</td><td>光通訊</td><td>68.0</td><td>0.0</td><td>5</td><td>10</td><td>10</td><td>5</td><td>5</td><td>10</td><td>0.0</td><td>10</td><td>3</td><td>2</td><td>2</td><td>4</td><td>2</td><td>0.0</td></tr>
-<tr><td>6830</td><td>汎銓</td><td>半導體檢測</td><td>69.0</td><td>0.0</td><td>5</td><td>10</td><td>10</td><td>5</td><td>5</td><td>10</td><td>0.0</td><td>10</td><td>0.0</td><td>5</td><td>0.0</td><td>4</td><td>2</td><td>3</td></tr>
-<tr><td>4991</td><td>環宇-KY</td><td>化合物半導體</td><td>78.0</td><td>5</td><td>5</td><td>10</td><td>10</td><td>5</td><td>5</td><td>10</td><td>0.0</td><td>10</td><td>0.0</td><td>8</td><td>0.0</td><td>4</td><td>3</td><td>3</td></tr>
-<tr><td>6442</td><td>光聖</td><td>光通訊</td><td>69.0</td><td>5</td><td>5</td><td>10</td><td>10</td><td>5</td><td>0.0</td><td>10</td><td>0.0</td><td>10</td><td>0.0</td><td>5</td><td>0.0</td><td>4</td><td>2</td><td>3</td></tr>
-<tr><td>2449</td><td>京元電子</td><td>IC測試</td><td>37.0</td><td>5</td><td>5</td><td>10</td><td>0.0</td><td>3</td><td>0.0</td><td>3</td><td>0.0</td><td>0.0</td><td>0.0</td><td>2</td><td>0.0</td><td>3</td><td>3</td><td>3</td></tr>
-<tr><td>6239</td><td>力成</td><td>封裝測試</td><td>40.0</td><td>0.0</td><td>5</td><td>10</td><td>0.0</td><td>5</td><td>0.0</td><td>10</td><td>0.0</td><td>3</td><td>0.0</td><td>2</td><td>0.0</td><td>3</td><td>2</td><td>0.0</td></tr>
-<tr><td>3260</td><td>威剛</td><td>記憶體</td><td>59.0</td><td>3</td><td>3</td><td>10</td><td>10</td><td>5</td><td>5</td><td>10</td><td>3</td><td>0.0</td><td>3</td><td>0.0</td><td>2</td><td>3</td><td>2</td><td>0.0</td></tr>
-<tr><td>2451</td><td>創見</td><td>記憶體</td><td>46.0</td><td>0.0</td><td>3</td><td>10</td><td>10</td><td>5</td><td>5</td><td>10</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>3</td><td>0.0</td><td>0.0</td></tr>
-<tr><td>3715</td><td>定穎投控</td><td>PCB</td><td>51.0</td><td>5</td><td>5</td><td>10</td><td>0.0</td><td>0.0</td><td>0.0</td><td>10</td><td>0.0</td><td>10</td><td>0.0</td><td>2</td><td>0.0</td><td>3</td><td>3</td><td>3</td></tr>
-<tr><td>1605</td><td>華新</td><td>電線電纜</td><td>84.0</td><td>5</td><td>5</td><td>10</td><td>10</td><td>5</td><td>5</td><td>10</td><td>6</td><td>10</td><td>0.0</td><td>5</td><td>4</td><td>4</td><td>2</td><td>3</td></tr>
-<tr><td>1785</td><td>光洋科</td><td>半導體材料</td><td>17.0</td><td>3</td><td>5</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>3</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>3</td><td>3</td></tr>
-<tr><td>3105</td><td>穩懋</td><td>化合物半導體</td><td>78.0</td><td>5</td><td>5</td><td>10</td><td>10</td><td>5</td><td>0.0</td><td>10</td><td>0.0</td><td>10</td><td>3</td><td>8</td><td>2</td><td>4</td><td>3</td><td>3</td></tr>
-<tr><td>3376</td><td>新日興</td><td>電子零組件</td><td>72.0</td><td>5</td><td>5</td><td>10</td><td>10</td><td>5</td><td>0.0</td><td>10</td><td>0.0</td><td>10</td><td>0.0</td><td>5</td><td>2</td><td>4</td><td>3</td><td>3</td></tr>
-<tr><td>6531</td><td>愛普*</td><td>半導體</td><td>66.0</td><td>5</td><td>5</td><td>10</td><td>10</td><td>5</td><td>0.0</td><td>10</td><td>0.0</td><td>10</td><td>0.0</td><td>2</td><td>0.0</td><td>4</td><td>2</td><td>3</td></tr>
-<tr><td>6257</td><td>矽格</td><td>封裝測試</td><td>35.0</td><td>3</td><td>5</td><td>10</td><td>0.0</td><td>0.0</td><td>0.0</td><td>6</td><td>0.0</td><td>0.0</td><td>0.0</td><td>2</td><td>0.0</td><td>3</td><td>3</td><td>3</td></tr>
-<tr><td>2408</td><td>南亞科</td><td>記憶體</td><td>93.0</td><td>5</td><td>5</td><td>10</td><td>10</td><td>5</td><td>5</td><td>10</td><td>10</td><td>10</td><td>5</td><td>5</td><td>4</td><td>4</td><td>2</td><td>3</td></tr>
-<tr><td>6278</td><td>台表科</td><td>電子代工</td><td>60.0</td><td>0.0</td><td>5</td><td>10</td><td>10</td><td>5</td><td>0.0</td><td>10</td><td>0.0</td><td>10</td><td>0.0</td><td>2</td><td>2</td><td>4</td><td>2</td><td>0.0</td></tr>
-<tr><td>8358</td><td>金居</td><td>銅箔</td><td>70.0</td><td>5</td><td>5</td><td>10</td><td>10</td><td>5</td><td>0.0</td><td>10</td><td>0.0</td><td>10</td><td>0.0</td><td>5</td><td>0.0</td><td>4</td><td>3</td><td>3</td></tr>
-<tr><td>2481</td><td>強茂</td><td>功率半導體</td><td>62.0</td><td>5</td><td>5</td><td>10</td><td>0.0</td><td>5</td><td>0.0</td><td>10</td><td>6</td><td>10</td><td>0.0</td><td>2</td><td>0.0</td><td>3</td><td>3</td><td>3</td></tr>
-<tr><td>2368</td><td>金像電</td><td>PCB</td><td>67.0</td><td>5</td><td>5</td><td>10</td><td>10</td><td>5</td><td>0.0</td><td>10</td><td>0.0</td><td>10</td><td>0.0</td><td>2</td><td>0.0</td><td>4</td><td>3</td><td>3</td></tr>
-<tr><td>3491</td><td>昇達科</td><td>射頻／微波元件</td><td>73.0</td><td>5</td><td>5</td><td>10</td><td>10</td><td>5</td><td>3</td><td>10</td><td>0.0</td><td>10</td><td>0.0</td><td>5</td><td>0.0</td><td>4</td><td>3</td><td>3</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="row-count">共 25 檔</p></div>
-<div class="tab-panel" id="panel-setup">
-    <div class="table-wrap">
-      <table id="table-setup">
-        <thead><tr><th onclick="sortTable('setup', 0, this)"><span class="th-label">股票代號</span><span class="sort-arrow"></span></th><th onclick="sortTable('setup', 1, this)"><span class="th-label">股票名稱</span><span class="sort-arrow"></span></th><th onclick="sortTable('setup', 2, this)"><span class="th-label">類別</span><span class="sort-arrow"></span></th><th onclick="sortTable('setup', 3, this)"><span class="th-label">回檔量能</span><span class="sort-arrow"></span></th><th onclick="sortTable('setup', 4, this)"><span class="th-label">低檔墊高</span><span class="sort-arrow"></span></th><th onclick="sortTable('setup', 5, this)"><span class="th-label">高低點結構</span><span class="sort-arrow"></span></th><th onclick="sortTable('setup', 6, this)"><span class="th-label">未破20日低點</span><span class="sort-arrow"></span></th><th onclick="sortTable('setup', 7, this)"><span class="th-label">MA20斜率</span><span class="sort-arrow"></span></th><th onclick="sortTable('setup', 8, this)"><span class="th-label">均線斜率改善</span><span class="sort-arrow"></span></th><th onclick="sortTable('setup', 9, this)"><span class="th-label">外資買超10d</span><span class="sort-arrow"></span></th><th onclick="sortTable('setup', 10, this)"><span class="th-label">投信買超10d</span><span class="sort-arrow"></span></th><th onclick="sortTable('setup', 11, this)"><span class="th-label">融資降溫</span><span class="sort-arrow"></span></th><th onclick="sortTable('setup', 12, this)"><span class="th-label">融資降但股價抗跌</span><span class="sort-arrow"></span></th><th onclick="sortTable('setup', 13, this)"><span class="th-label">借券穩定度</span><span class="sort-arrow"></span></th><th onclick="sortTable('setup', 14, this)"><span class="th-label">RSI轉強</span><span class="sort-arrow"></span></th><th onclick="sortTable('setup', 15, this)"><span class="th-label">MACD上揚</span><span class="sort-arrow"></span></th><th onclick="sortTable('setup', 16, this)"><span class="th-label">KD黃叉且未過熱</span><span class="sort-arrow"></span></th><th onclick="sortTable('setup', 17, this)"><span class="th-label">SetupScore</span><span class="sort-arrow"></span></th></tr></thead>
-        <tbody>
-<tr><td>3665</td><td>貿聯-KY</td><td>連接器</td><td>0.0</td><td>0.0</td><td>0.0</td><td>7</td><td>5</td><td>6</td><td>0.0</td><td>5</td><td>0.0</td><td>0.0</td><td>2</td><td>6</td><td>5</td><td>4</td><td>40.0</td></tr>
-<tr><td>2383</td><td>台光電</td><td>PCB材料</td><td>0.0</td><td>13</td><td>9</td><td>7</td><td>7</td><td>2</td><td>7</td><td>0.0</td><td>0.0</td><td>0.0</td><td>3</td><td>0.0</td><td>0.0</td><td>0.0</td><td>48.0</td></tr>
-<tr><td>2344</td><td>華邦電</td><td>記憶體</td><td>9</td><td>13</td><td>9</td><td>7</td><td>7</td><td>8</td><td>0.0</td><td>0.0</td><td>2</td><td>0.0</td><td>1</td><td>6</td><td>0.0</td><td>4</td><td>66.0</td></tr>
-<tr><td>7769</td><td>鴻勁</td><td>半導體設備</td><td>0.0</td><td>0.0</td><td>0.0</td><td>7</td><td>7</td><td>2</td><td>7</td><td>0.0</td><td>0.0</td><td>0.0</td><td>1</td><td>0.0</td><td>0.0</td><td>0.0</td><td>24.0</td></tr>
-<tr><td>4979</td><td>華星光</td><td>光通訊</td><td>9</td><td>13</td><td>0.0</td><td>7</td><td>7</td><td>8</td><td>0.0</td><td>5</td><td>1</td><td>0.0</td><td>1</td><td>0.0</td><td>0.0</td><td>0.0</td><td>51.0</td></tr>
-<tr><td>6830</td><td>汎銓</td><td>半導體檢測</td><td>9</td><td>13</td><td>0.0</td><td>7</td><td>7</td><td>8</td><td>0.0</td><td>5</td><td>0.0</td><td>0.0</td><td>1</td><td>6</td><td>0.0</td><td>0.0</td><td>56.0</td></tr>
-<tr><td>4991</td><td>環宇-KY</td><td>化合物半導體</td><td>0.0</td><td>5</td><td>0.0</td><td>7</td><td>7</td><td>8</td><td>0.0</td><td>5</td><td>0.0</td><td>0.0</td><td>1</td><td>6</td><td>5</td><td>0.0</td><td>44.0</td></tr>
-<tr><td>6442</td><td>光聖</td><td>光通訊</td><td>9</td><td>13</td><td>9</td><td>7</td><td>7</td><td>8</td><td>7</td><td>0.0</td><td>4</td><td>6</td><td>1</td><td>6</td><td>0.0</td><td>4</td><td>81.0</td></tr>
-<tr><td>2449</td><td>京元電子</td><td>IC測試</td><td>5</td><td>0.0</td><td>0.0</td><td>7</td><td>7</td><td>8</td><td>7</td><td>5</td><td>0.0</td><td>0.0</td><td>1</td><td>6</td><td>5</td><td>4</td><td>55.0</td></tr>
-<tr><td>6239</td><td>力成</td><td>封裝測試</td><td>0.0</td><td>13</td><td>9</td><td>7</td><td>7</td><td>8</td><td>0.0</td><td>0.0</td><td>2</td><td>0.0</td><td>1</td><td>6</td><td>0.0</td><td>0.0</td><td>53.0</td></tr>
-<tr><td>3260</td><td>威剛</td><td>記憶體</td><td>16</td><td>0.0</td><td>0.0</td><td>7</td><td>7</td><td>0.0</td><td>7</td><td>3</td><td>3</td><td>6</td><td>2</td><td>0.0</td><td>0.0</td><td>0.0</td><td>51.0</td></tr>
-<tr><td>2451</td><td>創見</td><td>記憶體</td><td>16</td><td>0.0</td><td>0.0</td><td>7</td><td>7</td><td>0.0</td><td>7</td><td>0.0</td><td>2</td><td>0.0</td><td>2</td><td>0.0</td><td>0.0</td><td>0.0</td><td>41.0</td></tr>
-<tr><td>3715</td><td>定穎投控</td><td>PCB</td><td>0.0</td><td>0.0</td><td>0.0</td><td>7</td><td>7</td><td>8</td><td>0.0</td><td>1</td><td>0.0</td><td>0.0</td><td>2</td><td>6</td><td>5</td><td>4</td><td>40.0</td></tr>
-<tr><td>1605</td><td>華新</td><td>電線電纜</td><td>0.0</td><td>13</td><td>9</td><td>7</td><td>7</td><td>8</td><td>7</td><td>0.0</td><td>1</td><td>0.0</td><td>3</td><td>6</td><td>0.0</td><td>4</td><td>65.0</td></tr>
-<tr><td>1785</td><td>光洋科</td><td>半導體材料</td><td>9</td><td>0.0</td><td>0.0</td><td>7</td><td>5</td><td>8</td><td>5</td><td>0.0</td><td>3</td><td>6</td><td>2</td><td>3</td><td>5</td><td>4</td><td>57.0</td></tr>
-<tr><td>3105</td><td>穩懋</td><td>化合物半導體</td><td>9</td><td>0.0</td><td>0.0</td><td>7</td><td>7</td><td>8</td><td>7</td><td>5</td><td>3</td><td>6</td><td>1</td><td>0.0</td><td>5</td><td>0.0</td><td>58.0</td></tr>
-<tr><td>3376</td><td>新日興</td><td>電子零組件</td><td>16</td><td>13</td><td>0.0</td><td>7</td><td>7</td><td>8</td><td>7</td><td>1</td><td>1</td><td>0.0</td><td>3</td><td>0.0</td><td>5</td><td>4</td><td>72.0</td></tr>
-<tr><td>6531</td><td>愛普*</td><td>半導體</td><td>5</td><td>5</td><td>0.0</td><td>7</td><td>7</td><td>8</td><td>7</td><td>0.0</td><td>0.0</td><td>0.0</td><td>2</td><td>6</td><td>0.0</td><td>0.0</td><td>47.0</td></tr>
-<tr><td>6257</td><td>矽格</td><td>封裝測試</td><td>9</td><td>0.0</td><td>0.0</td><td>7</td><td>7</td><td>8</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>1</td><td>6</td><td>5</td><td>4</td><td>47.0</td></tr>
-<tr><td>2408</td><td>南亞科</td><td>記憶體</td><td>9</td><td>13</td><td>0.0</td><td>7</td><td>7</td><td>8</td><td>5</td><td>1</td><td>4</td><td>6</td><td>1</td><td>6</td><td>0.0</td><td>4</td><td>71.0</td></tr>
-<tr><td>6278</td><td>台表科</td><td>電子代工</td><td>16</td><td>13</td><td>0.0</td><td>7</td><td>7</td><td>8</td><td>0.0</td><td>5</td><td>2</td><td>0.0</td><td>1</td><td>6</td><td>0.0</td><td>0.0</td><td>65.0</td></tr>
-<tr><td>8358</td><td>金居</td><td>銅箔</td><td>5</td><td>13</td><td>0.0</td><td>7</td><td>7</td><td>8</td><td>5</td><td>1</td><td>0.0</td><td>0.0</td><td>1</td><td>0.0</td><td>5</td><td>0.0</td><td>52.0</td></tr>
-<tr><td>2481</td><td>強茂</td><td>功率半導體</td><td>0.0</td><td>13</td><td>0.0</td><td>7</td><td>7</td><td>8</td><td>0.0</td><td>0.0</td><td>4</td><td>6</td><td>1</td><td>6</td><td>5</td><td>4</td><td>61.0</td></tr>
-<tr><td>2368</td><td>金像電</td><td>PCB</td><td>16</td><td>9</td><td>0.0</td><td>7</td><td>7</td><td>8</td><td>0.0</td><td>5</td><td>0.0</td><td>0.0</td><td>1</td><td>6</td><td>5</td><td>4</td><td>68.0</td></tr>
-<tr><td>3491</td><td>昇達科</td><td>射頻／微波元件</td><td>9</td><td>5</td><td>0.0</td><td>7</td><td>7</td><td>8</td><td>0.0</td><td>5</td><td>1</td><td>0.0</td><td>1</td><td>6</td><td>5</td><td>4</td><td>58.0</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="row-count">共 25 檔</p></div>
-<div class="tab-panel" id="panel-risk">
-    <div class="table-wrap">
-      <table id="table-risk">
-        <thead><tr><th onclick="sortTable('risk', 0, this)"><span class="th-label">股票代號</span><span class="sort-arrow"></span></th><th onclick="sortTable('risk', 1, this)"><span class="th-label">股票名稱</span><span class="sort-arrow"></span></th><th onclick="sortTable('risk', 2, this)"><span class="th-label">類別</span><span class="sort-arrow"></span></th><th onclick="sortTable('risk', 3, this)"><span class="th-label">離MA20過遠</span><span class="sort-arrow"></span></th><th onclick="sortTable('risk', 4, this)"><span class="th-label">離MA60過遠</span><span class="sort-arrow"></span></th><th onclick="sortTable('risk', 5, this)"><span class="th-label">高檔爆量</span><span class="sort-arrow"></span></th><th onclick="sortTable('risk', 6, this)"><span class="th-label">放量滯漲</span><span class="sort-arrow"></span></th><th onclick="sortTable('risk', 7, this)"><span class="th-label">RSI過熱</span><span class="sort-arrow"></span></th><th onclick="sortTable('risk', 8, this)"><span class="th-label">KD過熱</span><span class="sort-arrow"></span></th><th onclick="sortTable('risk', 9, this)"><span class="th-label">MACD轉弱</span><span class="sort-arrow"></span></th><th onclick="sortTable('risk', 10, this)"><span class="th-label">融資升溫過快</span><span class="sort-arrow"></span></th><th onclick="sortTable('risk', 11, this)"><span class="th-label">融資增但股價未漲</span><span class="sort-arrow"></span></th><th onclick="sortTable('risk', 12, this)"><span class="th-label">外資賣超5d</span><span class="sort-arrow"></span></th><th onclick="sortTable('risk', 13, this)"><span class="th-label">投信賣超5d</span><span class="sort-arrow"></span></th><th onclick="sortTable('risk', 14, this)"><span class="th-label">RiskScore</span><span class="sort-arrow"></span></th></tr></thead>
-        <tbody>
-<tr><td>3665</td><td>貿聯-KY</td><td>連接器</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>7</td><td>8</td><td>7</td><td>0.0</td><td>22.0</td></tr>
-<tr><td>2383</td><td>台光電</td><td>PCB材料</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>11</td><td>5</td><td>8</td><td>4</td><td>5</td><td>33.0</td></tr>
-<tr><td>2344</td><td>華邦電</td><td>記憶體</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>11</td><td>0.0</td><td>0.0</td><td>7</td><td>3</td><td>21.0</td></tr>
-<tr><td>7769</td><td>鴻勁</td><td>半導體設備</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>7</td><td>8</td><td>0.0</td><td>5</td><td>20.0</td></tr>
-<tr><td>4979</td><td>華星光</td><td>光通訊</td><td>5</td><td>3</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>11</td><td>2</td><td>0.0</td><td>7</td><td>0.0</td><td>28.0</td></tr>
-<tr><td>6830</td><td>汎銓</td><td>半導體檢測</td><td>9</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>11</td><td>7</td><td>0.0</td><td>7</td><td>0.0</td><td>34.0</td></tr>
-<tr><td>4991</td><td>環宇-KY</td><td>化合物半導體</td><td>5</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>5</td><td>0.0</td><td>0.0</td><td>0.0</td><td>10.0</td></tr>
-<tr><td>6442</td><td>光聖</td><td>光通訊</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>11</td><td>0.0</td><td>0.0</td><td>0.0</td><td>5</td><td>16.0</td></tr>
-<tr><td>2449</td><td>京元電子</td><td>IC測試</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>5</td><td>0.0</td><td>0.0</td><td>0.0</td><td>5.0</td></tr>
-<tr><td>6239</td><td>力成</td><td>封裝測試</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>7</td><td>3</td><td>10.0</td></tr>
-<tr><td>3260</td><td>威剛</td><td>記憶體</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>11</td><td>0.0</td><td>0.0</td><td>7</td><td>0.0</td><td>18.0</td></tr>
-<tr><td>2451</td><td>創見</td><td>記憶體</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>11</td><td>0.0</td><td>0.0</td><td>7</td><td>0.0</td><td>18.0</td></tr>
-<tr><td>3715</td><td>定穎投控</td><td>PCB</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>5</td><td>0.0</td><td>7</td><td>0.0</td><td>12.0</td></tr>
-<tr><td>1605</td><td>華新</td><td>電線電纜</td><td>0.0</td><td>0.0</td><td>0.0</td><td>9</td><td>0.0</td><td>0.0</td><td>11</td><td>2</td><td>0.0</td><td>0.0</td><td>0.0</td><td>22.0</td></tr>
-<tr><td>1785</td><td>光洋科</td><td>半導體材料</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>7</td><td>0.0</td><td>7.0</td></tr>
-<tr><td>3105</td><td>穩懋</td><td>化合物半導體</td><td>9</td><td>3</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>12.0</td></tr>
-<tr><td>3376</td><td>新日興</td><td>電子零組件</td><td>5</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>2</td><td>0.0</td><td>0.0</td><td>0.0</td><td>7.0</td></tr>
-<tr><td>6531</td><td>愛普*</td><td>半導體</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>11</td><td>5</td><td>0.0</td><td>7</td><td>0.0</td><td>23.0</td></tr>
-<tr><td>6257</td><td>矽格</td><td>封裝測試</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>5</td><td>8</td><td>7</td><td>5</td><td>25.0</td></tr>
-<tr><td>2408</td><td>南亞科</td><td>記憶體</td><td>0.0</td><td>3</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>11</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>14.0</td></tr>
-<tr><td>6278</td><td>台表科</td><td>電子代工</td><td>5</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>11</td><td>0.0</td><td>0.0</td><td>7</td><td>0.0</td><td>23.0</td></tr>
-<tr><td>8358</td><td>金居</td><td>銅箔</td><td>9</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>5</td><td>0.0</td><td>0.0</td><td>0.0</td><td>14.0</td></tr>
-<tr><td>2481</td><td>強茂</td><td>功率半導體</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td></tr>
-<tr><td>2368</td><td>金像電</td><td>PCB</td><td>5</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>7</td><td>0.0</td><td>7</td><td>0.0</td><td>19.0</td></tr>
-<tr><td>3491</td><td>昇達科</td><td>射頻／微波元件</td><td>5</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>7</td><td>0.0</td><td>12.0</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="row-count">共 25 檔</p></div>
+  <div id="warnings"></div>
+  <div id="list"></div>
+</div>
+
+<!-- 事件資料：新增事件請編輯 data 資料夾內的檔案 -->
+<script src="data/international.js"></script>
+<script src="data/taiwan.js"></script>
 
 <script>
-function switchTab(tabId, btnEl) {
-  document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
-  document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
-  btnEl.classList.add('active');
-  document.getElementById('panel-' + tabId).classList.add('active');
-}
+// ===== 設定 =====
+const GROUPS = ['國際', '台灣'];
+// 重要度 → 排序分數與星號數
+const IMPORTANCE = {
+  '極高':     { rank: 3,   stars: 3 },
+  '高至極高': { rank: 2.5, stars: 2, plus: true },
+  '高':       { rank: 2,   stars: 2 },
+  '中高':     { rank: 1,   stars: 1 },
+};
+const STATUS_LABEL = {
+  confirmed: '已確認', rule_based: '依規則推算', window: '觀察期間', conditional: '不定期／視情況',
+};
+const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
 
-function parseNumeric(text) {
-  if (text === '') return null;
-  var n = parseFloat(text.replace(/,/g, ''));
-  return isNaN(n) ? null : n;
-}
-
-function compareCell(a, b, dir) {
-  var aBlank = a === '';
-  var bBlank = b === '';
-  if (aBlank && bBlank) return 0;
-  if (aBlank) return 1;   // 空白永遠排最後，不受升冪/降冪影響
-  if (bBlank) return -1;
-
-  var na = parseNumeric(a);
-  var nb = parseNumeric(b);
-  var cmp;
-  if (na !== null && nb !== null) {
-    cmp = na - nb;
-  } else {
-    cmp = a.localeCompare(b, 'zh-Hant');
+// ===== CSV 解析（支援雙引號欄位） =====
+function parseCSV(text) {
+  const rows = []; let row = [], field = '', inQ = false;
+  const pushRow = () => { row.push(field); field = ''; if (row.some(v => v.trim() !== '')) rows.push(row); row = []; };
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) {
+      if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else inQ = false; }
+      else field += c;
+    } else if (c === '"') inQ = true;
+    else if (c === ',') { row.push(field); field = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; pushRow(); }
+    else field += c;
   }
-  return dir === 'asc' ? cmp : -cmp;
+  pushRow();
+  return rows;
 }
 
-function sortTable(tableId, colIndex, headerEl) {
-  var table = document.getElementById('table-' + tableId);
-  var tbody = table.tBodies[0];
-  var rows = Array.prototype.slice.call(tbody.rows);
-
-  var currentDir = headerEl.getAttribute('data-dir');
-  var newDir = currentDir === 'asc' ? 'desc' : 'asc';
-
-  var allHeaders = table.querySelectorAll('th');
-  allHeaders.forEach(function (th) {
-    th.removeAttribute('data-dir');
-    th.querySelector('.sort-arrow').textContent = '';
+// ===== 載入資料 =====
+const warnings = [];
+const events = [];
+(window.EVENT_SOURCES || []).forEach(src => {
+  const rows = parseCSV(src.csv);
+  const header = rows.shift().map(h => h.trim());
+  rows.forEach((r, idx) => {
+    const e = {};
+    header.forEach((h, i) => e[h] = (r[i] || '').trim());
+    const where = `${src.group}資料第 ${idx + 1} 筆「${e.event || '(無名稱)'}」`;
+    if (r.length !== header.length) warnings.push(`${where}：欄位數 ${r.length}，應為 ${header.length}（檢查逗號是否多或少）`);
+    e.group = src.group;
+    e.order = events.length;
+    e.imp = IMPORTANCE[e.importance];
+    if (!e.imp) { warnings.push(`${where}：重要度「${e.importance}」無法辨識`); e.imp = { rank: 0, stars: 0 }; }
+    e.dateObj = null;
+    if (e.date) {
+      const m = e.date.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      const d = m && new Date(+m[3], +m[1] - 1, +m[2]);
+      if (d && d.getMonth() === +m[1] - 1) e.dateObj = d;
+      else warnings.push(`${where}：日期「${e.date}」格式錯誤，應為 MM/DD/YYYY`);
+    }
+    events.push(e);
   });
-  headerEl.setAttribute('data-dir', newDir);
-  headerEl.querySelector('.sort-arrow').textContent = newDir === 'asc' ? '\u25B2' : '\u25BC';
+});
+events.sort((a, b) => {
+  if (!a.dateObj !== !b.dateObj) return a.dateObj ? -1 : 1;           // 無日期放最後
+  if (a.dateObj && b.dateObj && a.dateObj - b.dateObj) return a.dateObj - b.dateObj;
+  return (b.imp.rank - a.imp.rank) || (a.order - b.order);
+});
+const categories = [...new Set(events.map(e => e.category).filter(Boolean))];
 
-  rows.sort(function (rowA, rowB) {
-    var a = rowA.cells[colIndex] ? rowA.cells[colIndex].textContent.trim() : '';
-    var b = rowB.cells[colIndex] ? rowB.cells[colIndex].textContent.trim() : '';
-    return compareCell(a, b, newDir);
-  });
-
-  rows.forEach(function (row) { tbody.appendChild(row); });
+if (warnings.length) {
+  document.getElementById('warnings').innerHTML =
+    `<div class="warn">資料格式有問題，請檢查 data 資料夾：<ul>${warnings.map(w => `<li>${esc(w)}</li>`).join('')}</ul></div>`;
 }
+
+// ===== 過濾器 =====
+const state = { group: '全部', cat: '全部' };
+function buildChips(el, values, key) {
+  el.innerHTML = ['全部', ...values].map(v => `<button class="chip" data-v="${esc(v)}">${esc(v)}</button>`).join('');
+  el.addEventListener('click', ev => {
+    const b = ev.target.closest('.chip'); if (!b) return;
+    state[key] = b.dataset.v; render();
+  });
+}
+buildChips(document.getElementById('groupFilter'), GROUPS, 'group');
+buildChips(document.getElementById('catFilter'), categories, 'cat');
+document.getElementById('hidePast').addEventListener('change', render);
+
+// ===== 畫面 =====
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function starsHTML(imp, raw) {
+  const on = '★'.repeat(imp.stars) + (imp.plus ? '<span title="高至極高">+</span>' : '');
+  const off = '<span class="off">' + '★'.repeat(Math.max(0, 3 - imp.stars - (imp.plus ? 1 : 0))) + '</span>';
+  return `<span class="stars" title="重要度：${esc(raw)}">${on}${off}</span>`;
+}
+function eventHTML(e) {
+  const meta = [e.frequency, e.source && `來源：${e.source}`, STATUS_LABEL[e.status] || e.status, e.note].filter(Boolean);
+  return `<div class="ev">
+    <div class="ev-head">${starsHTML(e.imp, e.importance)}<span class="title">${esc(e.event)}</span></div>
+    <div class="tags">
+      <span class="tag g-${esc(e.group)}">${esc(e.group)}</span>
+      ${e.region && e.region !== e.group ? `<span class="tag">${esc(e.region)}</span>` : ''}
+      <span class="tag cat">${esc(e.category)}</span>
+    </div>
+    ${e.main_impact ? `<p class="impact">${esc(e.main_impact)}</p>` : ''}
+    <div class="meta">${meta.map(m => `<span>${esc(m)}</span>`).join('')}</div>
+  </div>`;
+}
+function render() {
+  document.querySelectorAll('#groupFilter .chip').forEach(b => b.classList.toggle('on', b.dataset.v === state.group));
+  document.querySelectorAll('#catFilter .chip').forEach(b => b.classList.toggle('on', b.dataset.v === state.cat));
+  const hidePast = document.getElementById('hidePast').checked;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+
+  const shown = events.filter(e =>
+    (state.group === '全部' || e.group === state.group) &&
+    (state.cat === '全部' || e.category === state.cat) &&
+    !(hidePast && e.dateObj && e.dateObj < today));
+  document.getElementById('count').textContent = `共 ${shown.length} 筆`;
+
+  // 依月份 → 日期分組
+  let html = '', curMonth = null, curKey = null, buf = [];
+  const flush = () => {
+    if (!buf.length) return;
+    const d = buf[0].dateObj;
+    let label;
+    if (d) {
+      const isToday = +d === +today;
+      label = `<span class="d">${d.getMonth() + 1}/${d.getDate()}</span><span class="w">（${WEEKDAYS[d.getDay()]}）</span>${isToday ? '<span class="today">今天</span>' : ''}`;
+    } else label = `<span class="d">—</span><span class="w">無固定日期</span>`;
+    html += `<div class="day ${d && d < today ? 'past' : ''}"><div class="dlabel">${label}</div><div class="events">${buf.map(eventHTML).join('')}</div></div>`;
+    buf = [];
+  };
+  shown.forEach(e => {
+    const month = e.dateObj ? `${e.dateObj.getFullYear()} 年 ${e.dateObj.getMonth() + 1} 月` : '不定期事件';
+    const key = e.dateObj ? +e.dateObj : 'none';
+    if (key !== curKey) { flush(); curKey = key; }
+    if (month !== curMonth) { html += `<h2 class="month">${month}</h2>`; curMonth = month; }
+    buf.push(e);
+  });
+  flush();
+  document.getElementById('list').innerHTML = html || '<div class="empty">沒有符合條件的事件</div>';
+}
+render();
 </script>
 </body>
 </html>
