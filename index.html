@@ -9,21 +9,21 @@
     --bg: #f6f7f9; --card: #ffffff; --text: #1d2330; --muted: #6b7280; --line: #e3e6eb;
     --accent: #2f5bd3; --accent-soft: #e8eefc; --star: #e0a100; --star-off: #d5d9e0;
     --tw: #0f8a6a; --tw-soft: #e2f4ee; --intl: #2f5bd3; --intl-soft: #e8eefc;
-    --warn-bg: #fff4e0; --warn-text: #8a5a00; --today: #d9480f;
+    --warn-bg: #fff4e0; --warn-text: #8a5a00; --today: #d9480f; --soon-bg: #fff1ea;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg: #13161c; --card: #1c2029; --text: #e6e8ee; --muted: #9aa1ad; --line: #2c313c;
       --accent: #7fa2ff; --accent-soft: #232d45; --star: #f2c14e; --star-off: #3a404c;
       --tw: #4fd1a8; --tw-soft: #173a31; --intl: #7fa2ff; --intl-soft: #232d45;
-      --warn-bg: #3a2c12; --warn-text: #f2c97a; --today: #ff8a5b;
+      --warn-bg: #3a2c12; --warn-text: #f2c97a; --today: #ff8a5b; --soon-bg: #33221b;
     }
   }
   :root[data-theme="dark"] {
     --bg: #13161c; --card: #1c2029; --text: #e6e8ee; --muted: #9aa1ad; --line: #2c313c;
     --accent: #7fa2ff; --accent-soft: #232d45; --star: #f2c14e; --star-off: #3a404c;
     --tw: #4fd1a8; --tw-soft: #173a31; --intl: #7fa2ff; --intl-soft: #232d45;
-    --warn-bg: #3a2c12; --warn-text: #f2c97a; --today: #ff8a5b;
+    --warn-bg: #3a2c12; --warn-text: #f2c97a; --today: #ff8a5b; --soon-bg: #33221b;
   }
   * { box-sizing: border-box; }
   body {
@@ -62,7 +62,10 @@
   .dlabel { font-weight: 600; }
   .dlabel .d { font-size: 1.25rem; display: block; line-height: 1.2; }
   .dlabel .w { font-size: .82rem; color: var(--muted); font-weight: 400; }
-  .dlabel .today { color: var(--today); font-size: .78rem; display: block; }
+  .dlabel .soonTag { color: var(--today); font-size: .78rem; font-weight: 600; display: block; }
+  /* 7 天內的事件：左側橘線＋淡底色 */
+  .day.soon { background: var(--soon-bg); border-left: 4px solid var(--today); border-radius: 6px; padding-left: 10px; padding-right: 8px; }
+  .soonCount { color: var(--today); font-weight: 600; }
   .past { opacity: .5; }
   .events { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 
@@ -149,6 +152,8 @@ const STATUS_LABEL = {
   confirmed: '已確認', rule_based: '依規則推算', window: '觀察期間', conditional: '不定期／視情況',
 };
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
+const UPCOMING_DAYS = 7;  // 標示「今天起幾天內」的事件（7 = 今天＋之後 6 天）
+const DAY_WORDS = ['今天', '明天', '後天'];
 
 // ===== CSV 解析（支援雙引號欄位） =====
 function parseCSV(text) {
@@ -258,7 +263,11 @@ function render() {
     (state.group === '全部' || e.group === state.group) &&
     (state.cat === '全部' || e.category === state.cat) &&
     !(hidePast && e.dateObj && e.dateObj < today));
-  document.getElementById('count').textContent = `共 ${shown.length} 筆`;
+  const daysFromToday = d => Math.round((d - today) / 86400000);
+  const isSoon = d => d && daysFromToday(d) >= 0 && daysFromToday(d) < UPCOMING_DAYS;
+  const soonCount = shown.filter(e => isSoon(e.dateObj)).length;
+  document.getElementById('count').innerHTML =
+    `共 ${shown.length} 筆${soonCount ? `・<span class="soonCount">${UPCOMING_DAYS} 天內 ${soonCount} 筆</span>` : ''}`;
 
   // 依月份 → 日期分組
   let html = '', curMonth = null, curKey = null, buf = [];
@@ -267,10 +276,11 @@ function render() {
     const d = buf[0].dateObj;
     let label;
     if (d) {
-      const isToday = +d === +today;
-      label = `<span class="d">${d.getMonth() + 1}/${d.getDate()}</span><span class="w">（${WEEKDAYS[d.getDay()]}）</span>${isToday ? '<span class="today">今天</span>' : ''}`;
+      const n = daysFromToday(d);
+      const tag = isSoon(d) ? `<span class="soonTag">${DAY_WORDS[n] || `${n} 天後`}</span>` : '';
+      label = `<span class="d">${d.getMonth() + 1}/${d.getDate()}</span><span class="w">（${WEEKDAYS[d.getDay()]}）</span>${tag}`;
     } else label = `<span class="d">—</span><span class="w">無固定日期</span>`;
-    html += `<div class="day ${d && d < today ? 'past' : ''}"><div class="dlabel">${label}</div><div class="events">${buf.map(eventHTML).join('')}</div></div>`;
+    html += `<div class="day ${d && d < today ? 'past' : ''} ${isSoon(d) ? 'soon' : ''}"><div class="dlabel">${label}</div><div class="events">${buf.map(eventHTML).join('')}</div></div>`;
     buf = [];
   };
   shown.forEach(e => {
