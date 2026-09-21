@@ -131,16 +131,24 @@
   </div>
 
   <div id="warnings"></div>
-  <div id="list"></div>
+  <div id="list"><div class="empty">資料載入中…</div></div>
 </div>
 
-<!-- 事件資料：新增事件請編輯 data 資料夾內的檔案 -->
+<!-- 備份資料：Google 試算表讀取失敗時才會使用 -->
 <script src="data/international.js"></script>
 <script src="data/taiwan.js"></script>
 
 <script>
+// ===== 資料來源 =====
+// 事件資料來自 Google 試算表（檔案 → 共用 → 發布到網路 → 選工作表 → CSV 格式 取得的網址）
+// 讀取失敗時會自動改用 data 資料夾內的備份資料
+const SHEET_SOURCES = [
+  { group: '國際', url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTzfGFREAHzj83y-gsnfd3WT2rbGW4FnElEK4JJgahYGEp8Vc1_KPCDKycI6IFixEK8PYMI9GZYbRIV/pub?output=csv' },
+  { group: '台灣', url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlGhG1HK-IuLHVITjLWyJ7hh4ZPEvKHn-aDGoL4aHGh4InBt-sinQRBupVNZuWR7vaBVh3-iu6Vvh5/pub?output=csv' },
+];
+
 // ===== 設定 =====
-const GROUPS = ['國際', '台灣'];
+const GROUPS = SHEET_SOURCES.map(s => s.group);
 // 重要度 → 排序分數與星號數
 const IMPORTANCE = {
   '極高':     { rank: 3,   stars: 3 },
@@ -174,44 +182,82 @@ function parseCSV(text) {
 }
 
 // ===== 載入資料 =====
-const warnings = [];
-const events = [];
-(window.EVENT_SOURCES || []).forEach(src => {
-  const rows = parseCSV(src.csv);
-  const header = rows.shift().map(h => h.trim());
-  rows.forEach((r, idx) => {
-    const e = {};
-    header.forEach((h, i) => e[h] = (r[i] || '').trim());
-    const where = `${src.group}資料第 ${idx + 1} 筆「${e.event || '(無名稱)'}」`;
-    if (r.length !== header.length) warnings.push(`${where}：欄位數 ${r.length}，應為 ${header.length}（檢查逗號是否多或少）`);
-    e.group = src.group;
-    e.order = events.length;
-    e.imp = IMPORTANCE[e.importance];
-    if (!e.imp) { warnings.push(`${where}：重要度「${e.importance}」無法辨識`); e.imp = { rank: 0, stars: 0 }; }
-    e.dateObj = null;
-    if (e.date) {
-      const m = e.date.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-      const d = m && new Date(+m[3], +m[1] - 1, +m[2]);
-      if (d && d.getMonth() === +m[1] - 1) e.dateObj = d;
-      else warnings.push(`${where}：日期「${e.date}」格式錯誤，應為 MM/DD/YYYY`);
-    }
-    events.push(e);
-  });
-});
-events.sort((a, b) => {
-  if (!a.dateObj !== !b.dateObj) return a.dateObj ? -1 : 1;           // 無日期放最後
-  if (a.dateObj && b.dateObj && a.dateObj - b.dateObj) return a.dateObj - b.dateObj;
-  return (b.imp.rank - a.imp.rank) || (a.order - b.order);
-});
-const categories = [...new Set(events.map(e => e.category).filter(Boolean))];
+const warnings = [];   // 資料格式問題
+const notices = [];    // 讀取失敗等提示
+let events = [];
 
-if (warnings.length) {
-  document.getElementById('warnings').innerHTML =
-    `<div class="warn">資料格式有問題，請檢查 data 資料夾：<ul>${warnings.map(w => `<li>${esc(w)}</li>`).join('')}</ul></div>`;
+async function fetchCSV(url) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 10000);  // 10 秒逾時
+  try {
+    const res = await fetch(url, { cache: 'no-cache', signal: ctrl.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = (await res.text()).replace(/^﻿/, '');
+    // 試算表若取消發布，Google 會回傳網頁而不是 CSV
+    if (!text.trimStart().toLowerCase().startsWith('date,')) throw new Error('內容不是預期的 CSV');
+    return text;
+  } finally { clearTimeout(timer); }
+}
+
+async function loadSources() {
+  const backups = window.EVENT_SOURCES || [];
+  return Promise.all(SHEET_SOURCES.map(async s => {
+    try { return { group: s.group, csv: await fetchCSV(s.url), fromSheet: true }; }
+    catch (err) {
+      notices.push(`「${s.group}」Google 試算表讀取失敗（${err.name === 'AbortError' ? '逾時' : err.message}），目前顯示備份資料，可能不是最新。`);
+      return backups.find(b => b.group === s.group) || { group: s.group, csv: '' };
+    }
+  }));
+}
+
+// 接受 2026-09-17、2026/9/17、09/17/2026 三種寫法
+function parseDate(s) {
+  let m, y, mo, d;
+  if ((m = s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/))) [y, mo, d] = [m[1], m[2], m[3]];
+  else if ((m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/))) [y, mo, d] = [m[3], m[1], m[2]];
+  else return null;
+  const dt = new Date(+y, +mo - 1, +d);
+  return dt.getMonth() === +mo - 1 ? dt : null;
+}
+
+function parseEvents(sources) {
+  const list = [];
+  sources.forEach(src => {
+    const rows = parseCSV(src.csv);
+    if (!rows.length) return;
+    const header = rows.shift().map(h => h.trim());
+    rows.forEach((r, idx) => {
+      const e = {};
+      header.forEach((h, i) => e[h] = (r[i] || '').trim());
+      // 試算表第 1 列是標題，所以資料第 1 筆在第 2 列
+      const where = `${src.group}${src.fromSheet ? '工作表' : '備份資料'}第 ${idx + 2} 列「${e.event || '(無名稱)'}」`;
+      if (r.length !== header.length) warnings.push(`${where}：欄位數 ${r.length}，應為 ${header.length}`);
+      e.group = src.group;
+      e.order = list.length;
+      e.imp = IMPORTANCE[e.importance];
+      if (!e.imp) { warnings.push(`${where}：重要度「${e.importance}」無法辨識`); e.imp = { rank: 0, stars: 0 }; }
+      e.dateObj = e.date ? parseDate(e.date) : null;
+      if (e.date && !e.dateObj) warnings.push(`${where}：日期「${e.date}」無法辨識，請用 2026-09-17 這種格式`);
+      list.push(e);
+    });
+  });
+  return list.sort((a, b) => {
+    if (!a.dateObj !== !b.dateObj) return a.dateObj ? -1 : 1;           // 無日期放最後
+    if (a.dateObj && b.dateObj && a.dateObj - b.dateObj) return a.dateObj - b.dateObj;
+    return (b.imp.rank - a.imp.rank) || (a.order - b.order);
+  });
+}
+
+function showMessages() {
+  let html = '';
+  if (notices.length) html += `<div class="warn">${notices.map(esc).join('<br>')}</div>`;
+  if (warnings.length) html += `<div class="warn">資料格式有問題，請檢查 Google 試算表：<ul>${warnings.map(w => `<li>${esc(w)}</li>`).join('')}</ul></div>`;
+  document.getElementById('warnings').innerHTML = html;
 }
 
 // ===== 過濾器 =====
 const state = { group: '全部', cat: '全部' };
+const catSelect = document.getElementById('catSelect');
 function buildChips(el, values, key) {
   el.innerHTML = ['全部', ...values].map(v => `<button class="chip" data-v="${esc(v)}">${esc(v)}</button>`).join('');
   el.addEventListener('click', ev => {
@@ -219,14 +265,16 @@ function buildChips(el, values, key) {
     state[key] = b.dataset.v; render();
   });
 }
-buildChips(document.getElementById('groupFilter'), GROUPS, 'group');
-buildChips(document.getElementById('catFilter'), categories, 'cat');
-// 手機版的類別下拉選單（與桌機版按鈕共用同一個狀態）
-const catSelect = document.getElementById('catSelect');
-catSelect.innerHTML = [['全部', '全部類別'], ...categories.map(c => [c, c])]
-  .map(([v, t]) => `<option value="${esc(v)}">${esc(t)}</option>`).join('');
-catSelect.addEventListener('change', () => { state.cat = catSelect.value; render(); });
-document.getElementById('hidePast').addEventListener('change', render);
+function buildFilters() {
+  const categories = [...new Set(events.map(e => e.category).filter(Boolean))];
+  buildChips(document.getElementById('groupFilter'), GROUPS, 'group');
+  buildChips(document.getElementById('catFilter'), categories, 'cat');
+  // 手機版的類別下拉選單（與桌機版按鈕共用同一個狀態）
+  catSelect.innerHTML = [['全部', '全部類別'], ...categories.map(c => [c, c])]
+    .map(([v, t]) => `<option value="${esc(v)}">${esc(t)}</option>`).join('');
+  catSelect.addEventListener('change', () => { state.cat = catSelect.value; render(); });
+  document.getElementById('hidePast').addEventListener('change', render);
+}
 
 // ===== 畫面 =====
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
@@ -293,7 +341,14 @@ function render() {
   flush();
   document.getElementById('list').innerHTML = html || '<div class="empty">沒有符合條件的事件</div>';
 }
-render();
+
+// ===== 啟動 =====
+(async () => {
+  events = parseEvents(await loadSources());
+  showMessages();
+  buildFilters();
+  render();
+})();
 
 // ===== 手機：往下滑時把上方選項列推出畫面，地區＋類別那一行常駐 =====
 const filtersEl = document.querySelector('.filters');
